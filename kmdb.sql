@@ -105,13 +105,81 @@
 
 -- Drop existing tables, so you'll start fresh each time this script is run.
 -- TODO!
+DROP TABLE IF EXISTS MovieActors;
+DROP TABLE IF EXISTS Movies;
+DROP TABLE IF EXISTS Actors;
+DROP TABLE IF EXISTS Studios;
 
 -- Create new tables, according to your domain model
 -- TODO!
+CREATE TABLE Studios (
+    studio_id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL
+);
+
+CREATE TABLE Movies (
+    movie_id INTEGER PRIMARY KEY,
+    title TEXT NOT NULL,
+    year_released INTEGER NOT NULL,
+    mpaa_rating TEXT NOT NULL,
+    studio_id INTEGER,
+    FOREIGN KEY (studio_id) REFERENCES Studios(studio_id)
+);
+
+CREATE TABLE Actors (
+    actor_id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL
+);
+
+CREATE TABLE MovieActors (
+    movie_id INTEGER,
+    actor_id INTEGER,
+    character_name TEXT NOT NULL,
+    FOREIGN KEY (movie_id) REFERENCES Movies(movie_id),
+    FOREIGN KEY (actor_id) REFERENCES Actors(actor_id),
+    PRIMARY KEY (movie_id, actor_id)
+);
 
 -- Insert data into your database that reflects the sample data shown above
 -- Use hard-coded foreign key IDs when necessary
 -- TODO!
+
+INSERT INTO Studios (name) VALUES ('Warner Bros.');
+
+INSERT INTO Movies (title, year_released, mpaa_rating, studio_id) VALUES 
+('Batman Begins', 2005, 'PG-13', 1),
+('The Dark Knight', 2008, 'PG-13', 1),
+('The Dark Knight Rises', 2012, 'PG-13', 1);
+
+INSERT INTO Actors (name) VALUES 
+('Christian Bale'),
+('Michael Caine'),
+('Liam Neeson'),
+('Gary Oldman'),
+('Heath Ledger'),
+('Tom Hardy'),
+('Katie Holmes'),
+('Aaron Eckhart'),
+('Maggie Gyllenhaal'),
+('Joseph Gordon-Levitt'),
+('Anne Hathaway');
+
+INSERT INTO MovieActors (movie_id, actor_id, character_name) VALUES 
+(1, 1, 'Bruce Wayne'),
+(1, 2, 'Alfred'),
+(1, 3, 'Ras Al Ghul'),
+(1, 7, 'Rachel Dawes'),
+(1, 4, 'Commissioner Gordon'),
+(2, 1, 'Bruce Wayne'),
+(2, 5, 'Joker'),
+(2, 8, 'Harvey Dent'),
+(2, 2, 'Alfred'),
+(2, 9, 'Rachel Dawes'),
+(3, 1, 'Bruce Wayne'),
+(3, 4, 'Commissioner Gordon'),
+(3, 6, 'Bane'),
+(3, 10, 'John Blake'),
+(3, 11, 'Selina Kyle');
 
 -- Prints a header for the movies output
 .print "Movies"
@@ -120,6 +188,13 @@
 
 -- The SQL statement for the movies output
 -- TODO!
+SELECT 
+    title || '          ' || 
+    year_released || '           ' || 
+    mpaa_rating || '  ' || 
+    (SELECT name FROM Studios WHERE studio_id = Movies.studio_id)
+FROM Movies;
+
 
 -- Prints a header for the cast output
 .print ""
@@ -130,3 +205,12 @@
 
 -- The SQL statement for the cast output
 -- TODO!
+SELECT 
+    M.title || '          ' || 
+    A.name || '        ' || 
+    MA.character_name
+FROM MovieActors MA
+JOIN Movies M ON MA.movie_id = M.movie_id
+JOIN Actors A ON MA.actor_id = A.actor_id
+ORDER BY MA.movie_id, MA.actor_id;
+
